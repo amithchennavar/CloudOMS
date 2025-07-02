@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Management System</title>
+    <link href="https://kendo.cdn.telerik.com/2023.3.1010/styles/kendo.default-v2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2023.3.1010/js/kendo.all.min.js"></script>
+</head>
+<body>
+    <div id="grid"></div>
+    <div>
+        <input id="userId" placeholder="User ID" />
+        <input id="productId" placeholder="Product ID" />
+        <input id="quantity" type="number" placeholder="Quantity" />
+        <select id="status">
+            <option value="Pending">Pending</option>
+            <option value="Shipped">Shipped</option>
+        </select>
+        <button id="addOrder">Add Order</button>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $("#grid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: { url: "https://localhost:44337/api/Orders", dataType: "json" },
+                        create: { url: "https://localhost:44337/api/Orders", type: "POST", dataType: "json" }
+                    },
+                    schema: {
+                        model: {
+                            id: "id",
+                            fields: {
+                                id: { type: "number" },
+                                userId: { type: "string" },
+                                productId: { type: "string" },
+                                quantity: { type: "number" },
+                                status: { type: "string" },
+                                orderDate: { type: "date" }
+                            }
+                        }
+                    }
+                },
+                columns: [
+                    { field: "id", title: "ID" },
+                    { field: "userId", title: "User ID" },
+                    { field: "productId", title: "Product ID" },
+                    { field: "quantity", title: "Quantity" },
+                    { field: "status", title: "Status" },
+                    { field: "orderDate", title: "Order Date", format: "{0:yyyy-MM-dd HH:mm:ss}" }
+                ],
+                editable: "popup"
+            });
+
+            $("#addOrder").click(function() {
+                var order = {
+                    userId: $("#userId").val(),
+                    productId: $("#productId").val(),
+                    quantity: parseInt($("#quantity").val()),
+                    status: $("#status").val()
+                };
+                $.ajax({
+                    url: "https://localhost:44337/api/Orders",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(order),
+                    success: function() {
+                        $("#grid").data("kendoGrid").dataSource.read();
+                        $("#userId, #productId, #quantity").val("");
+                    },
+                    error: function(xhr) {
+                        alert("Error: " + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
