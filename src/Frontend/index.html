@@ -7,20 +7,35 @@
     <script src="https://kendo.cdn.telerik.com/2023.3.1010/js/kendo.all.min.js"></script>
 </head>
 <body>
-    <div id="grid"></div>
+    <!-- Order Grid and Form -->
+    <h2>Orders</h2>
+    <div id="orderGrid"></div>
     <div>
-        <input id="userId" placeholder="User ID" />
-        <input id="productId" placeholder="Product ID" />
-        <input id="quantity" type="number" placeholder="Quantity" />
-        <select id="status">
+        <input id="orderUserId" placeholder="User ID" />
+        <input id="orderProductId" placeholder="Product ID" />
+        <input id="orderQuantity" type="number" placeholder="Quantity" />
+        <select id="orderStatus">
             <option value="Pending">Pending</option>
             <option value="Shipped">Shipped</option>
         </select>
         <button id="addOrder">Add Order</button>
     </div>
+
+    <!-- Inventory Grid and Form -->
+    <h2>Inventory</h2>
+    <div id="inventoryGrid"></div>
+    <div>
+        <input id="inventoryProductId" placeholder="Product ID" />
+        <input id="inventoryName" placeholder="Name" />
+        <input id="inventoryStock" type="number" placeholder="Stock" />
+        <input id="inventoryPrice" type="number" step="0.01" placeholder="Price" />
+        <button id="addInventory">Add Inventory</button>
+    </div>
+
     <script>
         $(document).ready(function () {
-            $("#grid").kendoGrid({
+            // Order Grid
+            $("#orderGrid").kendoGrid({
                 dataSource: {
                     transport: {
                         read: { url: "https://localhost:44361/gateway/Orders", dataType: "json" },
@@ -53,10 +68,10 @@
 
             $("#addOrder").click(function () {
                 var order = {
-                    userId: $("#userId").val(),
-                    productId: $("#productId").val(),
-                    quantity: parseInt($("#quantity").val()),
-                    status: $("#status").val()
+                    userId: $("#orderUserId").val(),
+                    productId: $("#orderProductId").val(),
+                    quantity: parseInt($("#orderQuantity").val()),
+                    status: $("#orderStatus").val()
                 };
                 $.ajax({
                     url: "https://localhost:44361/gateway/Orders",
@@ -64,8 +79,60 @@
                     contentType: "application/json",
                     data: JSON.stringify(order),
                     success: function () {
-                        $("#grid").data("kendoGrid").dataSource.read();
-                        $("#userId, #productId, #quantity").val("");
+                        $("#orderGrid").data("kendoGrid").dataSource.read();
+                        $("#orderUserId, #orderProductId, #orderQuantity").val("");
+                    },
+                    error: function (xhr) {
+                        alert("Error: " + xhr.responseText);
+                    }
+                });
+            });
+
+            // Inventory Grid
+            $("#inventoryGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: { url: "https://localhost:44361/gateway/Inventory", dataType: "json" },
+                        create: { url: "https://localhost:44361/gateway/Inventory", type: "POST", dataType: "json" }
+                    },
+                    schema: {
+                        model: {
+                            id: "id",
+                            fields: {
+                                id: { type: "number" },
+                                productId: { type: "string" },
+                                name: { type: "string" },
+                                stock: { type: "number" },
+                                price: { type: "number" }
+                            }
+                        }
+                    }
+                },
+                columns: [
+                    { field: "id", title: "ID" },
+                    { field: "productId", title: "Product ID" },
+                    { field: "name", title: "Name" },
+                    { field: "stock", title: "Stock" },
+                    { field: "price", title: "Price", format: "{0:c}" }
+                ],
+                editable: "popup"
+            });
+
+            $("#addInventory").click(function () {
+                var inventory = {
+                    productId: $("#inventoryProductId").val(),
+                    name: $("#inventoryName").val(),
+                    stock: parseInt($("#inventoryStock").val()),
+                    price: parseFloat($("#inventoryPrice").val())
+                };
+                $.ajax({
+                    url: "https://localhost:44361/gateway/Inventory",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(inventory),
+                    success: function () {
+                        $("#inventoryGrid").data("kendoGrid").dataSource.read();
+                        $("#inventoryProductId, #inventoryName, #inventoryStock, #inventoryPrice").val("");
                     },
                     error: function (xhr) {
                         alert("Error: " + xhr.responseText);
