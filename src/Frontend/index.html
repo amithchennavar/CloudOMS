@@ -19,12 +19,12 @@
         <button id="addOrder">Add Order</button>
     </div>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $("#grid").kendoGrid({
                 dataSource: {
                     transport: {
-                        read: { url: "https://localhost:44337/api/Orders", dataType: "json" },
-                        create: { url: "https://localhost:44337/api/Orders", type: "POST", dataType: "json" }
+                        read: { url: "https://localhost:44361/gateway/Orders", dataType: "json" },
+                        create: { url: "https://localhost:44361/gateway/Orders", type: "POST", dataType: "json" }
                     },
                     schema: {
                         model: {
@@ -51,7 +51,7 @@
                 editable: "popup"
             });
 
-            $("#addOrder").click(function() {
+            $("#addOrder").click(function () {
                 var order = {
                     userId: $("#userId").val(),
                     productId: $("#productId").val(),
@@ -59,15 +59,15 @@
                     status: $("#status").val()
                 };
                 $.ajax({
-                    url: "https://localhost:44337/api/Orders",
+                    url: "https://localhost:44361/gateway/Orders",
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify(order),
-                    success: function() {
+                    success: function () {
                         $("#grid").data("kendoGrid").dataSource.read();
                         $("#userId, #productId, #quantity").val("");
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         alert("Error: " + xhr.responseText);
                     }
                 });
