@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OrderService.Data;
 using OrderService.Models;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrderService.Controllers
 {
@@ -9,27 +9,31 @@ namespace OrderService.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        public static List<Order> _orders = new List<Order>();
-        private static int _nextId = 1;
+        private readonly OrderContext _context;
+
+        public OrdersController(OrderContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Order>> GetOrders()
+        public async Task<IActionResult> GetOrders()
         {
-            return Ok(_orders);
+            var orders = await _context.Orders.ToListAsync();
+            return Ok(orders);
         }
 
         [HttpPost]
-        public ActionResult<Order> CreateOrder([FromBody] Order order)
+        public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
-            if (order == null)
+            if (order == null || string.IsNullOrEmpty(order.UserId))
             {
-                return BadRequest("Order data is required");
+                return BadRequest("User ID is required.");
             }
-            order.Id = _nextId++;
             order.OrderDate = DateTime.UtcNow;
-            _orders.Add(order);
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetOrders), new { id = order.Id }, order);
-
         }
     }
 }

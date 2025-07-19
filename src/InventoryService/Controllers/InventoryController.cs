@@ -1,6 +1,7 @@
-﻿using InventoryService.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using InventoryService.Data;
+using InventoryService.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryService.Controllers
 {
@@ -8,24 +9,29 @@ namespace InventoryService.Controllers
     [ApiController]
     public class InventoryController : ControllerBase
     {
-        private static List<InventoryItem> _inventory = new List<InventoryItem>();
-        private static int _nextId = 1;
+        private readonly InventoryContext _context;
+
+        public InventoryController(InventoryContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
-        public ActionResult<IEnumerable<InventoryItem>> GetInventory()
+        public async Task<IActionResult> GetInventory()
         {
-            return Ok(_inventory);
+            var inventory = await _context.Inventory.ToListAsync();
+            return Ok(inventory);
         }
 
         [HttpPost]
-        public ActionResult<InventoryItem> CreateInventoryItem([FromBody] InventoryItem item)
+        public async Task<IActionResult> CreateInventoryItem([FromBody] InventoryItem item)
         {
             if (item == null || string.IsNullOrEmpty(item.ProductId))
             {
                 return BadRequest("Product ID is required.");
             }
-            item.Id = _nextId++;
-            _inventory.Add(item);
+            _context.Inventory.Add(item);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetInventory), new { id = item.Id }, item);
         }
     }
