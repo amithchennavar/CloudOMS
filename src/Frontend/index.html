@@ -39,31 +39,69 @@
                 dataSource: {
                     transport: {
                         read: { url: "https://localhost:44361/gateway/Orders", dataType: "json" },
-                        create: { url: "https://localhost:44361/gateway/Orders", type: "POST", dataType: "json" }
+                        create: { url: "https://localhost:44361/gateway/Orders", type: "POST", dataType: "json" },
+                        update: { url: "https://localhost:44361/gateway/Orders/{id}", type: "PUT", dataType: "json" },
+                        destroy: { url: "https://localhost:44361/gateway/Orders/{id}", type: "DELETE", dataType: "json" }
                     },
                     schema: {
                         model: {
                             id: "id",
                             fields: {
-                                id: { type: "number" },
-                                userId: { type: "string" },
-                                productId: { type: "string" },
-                                quantity: { type: "number" },
-                                status: { type: "string" },
-                                orderDate: { type: "date" }
+                                id: { type: "number", editable: false },
+                                userId: { type: "string", validation: { required: true } },
+                                productId: { type: "string", validation: { required: true } },
+                                quantity: { type: "number", validation: { required: true, min: 1 } },
+                                status: { type: "string", validation: { required: true } },
+                                orderDate: { type: "date", editable: false }
                             }
                         }
                     }
                 },
                 columns: [
-                    { field: "id", title: "ID" },
+                    { field: "id", title: "ID", editable: false },
                     { field: "userId", title: "User ID" },
                     { field: "productId", title: "Product ID" },
                     { field: "quantity", title: "Quantity" },
-                    { field: "status", title: "Status" },
-                    { field: "orderDate", title: "Order Date", format: "{0:yyyy-MM-dd HH:mm:ss}" }
+                    { field: "status", title: "Status", editor: categoryDropDownEditor },
+                    { field: "orderDate", title: "Order Date", format: "{0:yyyy-MM-dd HH:mm:ss}", editable: false },
+                    { command: ["edit", "destroy"], title: "&nbsp;" }
                 ],
-                editable: "popup"
+                editable: "popup",
+                toolbar: ["create"]
+            });
+
+            // Inventory Grid
+            $("#inventoryGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: { url: "https://localhost:44361/gateway/Inventory", dataType: "json" },
+                        create: { url: "https://localhost:44361/gateway/Inventory", type: "POST", dataType: "json" },
+                        update: { url: "https://localhost:44361/gateway/Inventory/{id}", type: "PUT", dataType: "json" },
+                        destroy: { url: "https://localhost:44361/gateway/Inventory/{id}", type: "DELETE", dataType: "json" }
+                    },
+                    schema: {
+                        model: {
+                            id: "id",
+                            fields: {
+                                id: { type: "number", editable: false },
+                                productId: { type: "string", validation: { required: true } },
+                                name: { type: "string", validation: { required: true } },
+                                stock: { type: "number", validation: { required: true, min: 0 } },
+                                price: { type: "number", validation: { required: true, min: 0 } }
+                            }
+                        }
+                    }
+                },
+                columns: [
+                    { field: "id", title: "ID", editable: false },
+                    { field: "productId", title: "Product ID" },
+                    { field: "name", title: "Name" },
+                    { field: "stock", title: "Stock" },
+                    { field: "price", title: "Price", format: "{0:c}" },
+                    { command: ["edit", "destroy"], title: "&nbsp;" }
+                ],
+                editable: "popup",
+                toolbar: ["create"]
             });
 
             $("#addOrder").click(function () {
@@ -88,36 +126,6 @@
                 });
             });
 
-            // Inventory Grid
-            $("#inventoryGrid").kendoGrid({
-                dataSource: {
-                    transport: {
-                        read: { url: "https://localhost:44361/gateway/Inventory", dataType: "json" },
-                        create: { url: "https://localhost:44361/gateway/Inventory", type: "POST", dataType: "json" }
-                    },
-                    schema: {
-                        model: {
-                            id: "id",
-                            fields: {
-                                id: { type: "number" },
-                                productId: { type: "string" },
-                                name: { type: "string" },
-                                stock: { type: "number" },
-                                price: { type: "number" }
-                            }
-                        }
-                    }
-                },
-                columns: [
-                    { field: "id", title: "ID" },
-                    { field: "productId", title: "Product ID" },
-                    { field: "name", title: "Name" },
-                    { field: "stock", title: "Stock" },
-                    { field: "price", title: "Price", format: "{0:c}" }
-                ],
-                editable: "popup"
-            });
-
             $("#addInventory").click(function () {
                 var inventory = {
                     productId: $("#inventoryProductId").val(),
@@ -139,6 +147,21 @@
                     }
                 });
             });
+
+            // Custom editor for status dropdown
+            function categoryDropDownEditor(container, options) {
+                $('<input required name="' + options.field + '"/>')
+                    .appendTo(container)
+                    .kendoDropDownList({
+                        dataTextField: "text",
+                        dataValueField: "value",
+                        dataSource: [
+                            { text: "Pending", value: "Pending" },
+                            { text: "Shipped", value: "Shipped" }
+                        ],
+                        value: options.model[options.field]
+                    });
+            }
         });
     </script>
 </body>
