@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryService", "Invento
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{162E9F77-6F94-4F24-AD04-3B06C02DE763}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "UserService\UserService.csproj", "{3635CEA6-A430-4BAB-98A4-7A3959658992}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{162E9F77-6F94-4F24-AD04-3B06C02DE763}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{162E9F77-6F94-4F24-AD04-3B06C02DE763}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{162E9F77-6F94-4F24-AD04-3B06C02DE763}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3635CEA6-A430-4BAB-98A4-7A3959658992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3635CEA6-A430-4BAB-98A4-7A3959658992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3635CEA6-A430-4BAB-98A4-7A3959658992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3635CEA6-A430-4BAB-98A4-7A3959658992}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
