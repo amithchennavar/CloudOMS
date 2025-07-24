@@ -8,7 +8,7 @@ namespace OrderService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize] 
     public class OrdersController : ControllerBase
     {
         private readonly OrderContext _context;
