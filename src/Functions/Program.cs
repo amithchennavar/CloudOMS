@@ -10,7 +10,13 @@ builder.ConfigureServices((hostContext, services) =>
     services.AddHostedService<Worker>();
     services.AddDbContext<FunctionContext>(options =>
         options.UseSqlite("Data Source=statusupdates.db"));
+    services.AddLogging(logging =>
+    {
+        logging.AddConsole();
+    });
 });
+// Add logging
+
 
 var app = builder.Build();
 
@@ -19,7 +25,11 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<FunctionContext>();
     context.Database.Migrate();
-    Console.WriteLine("Migration applied. Database path: " + context.Database.GetDbConnection().ConnectionString);
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Migration applied. Database path: " + context.Database.GetDbConnection().ConnectionString);
+    logger.LogInformation("Migrations applied for Functions.");
+
+
 }
 
 app.Run();

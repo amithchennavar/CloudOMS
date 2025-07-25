@@ -4,6 +4,7 @@ using InventoryService.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 
+
 namespace InventoryService.Controllers
 {
     [Route("api/[controller]")]
@@ -17,57 +18,94 @@ namespace InventoryService.Controllers
         {
             _context = context;
         }
+        // <summary>
+        /// Retrieves a list of all Inventories.
+        /// </summary>
+        /// <returns>A list of orders.</returns>
+        /// <response code="200">Returns the list of Inventories.</response>
+        /// <response code="500">If there is an internal server error.</response>
 
         [HttpGet]
         public async Task<IActionResult> GetInventory()
         {
-            var inventory = await _context.Inventory.ToListAsync();
-            return Ok(inventory);
+            try
+            {
+                var inventory = await _context.Inventory.ToListAsync();
+                return Ok(inventory);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateInventoryItem([FromBody] InventoryItem item)
         {
-            if (item == null || string.IsNullOrEmpty(item.ProductId))
+            try
             {
-                return BadRequest("Product ID is required.");
+                if (item == null || string.IsNullOrEmpty(item.ProductId))
+                {
+                    return BadRequest("Product ID is required.");
+                }
+                _context.Inventory.Add(item);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetInventory), new { id = item.Id }, item);
             }
-            _context.Inventory.Add(item);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetInventory), new { id = item.Id }, item);
+
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"Error Creating Inventory: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateInventoryItem(int id, [FromBody] InventoryItem item)
         {
-            if (item == null || id != item.Id)
+            try
             {
-                return BadRequest("Invalid ID or inventory data.");
+                if (item == null || id != item.Id)
+                {
+                    return BadRequest("Invalid ID or inventory data.");
+                }
+                var existingItem = await _context.Inventory.FindAsync(id);
+                if (existingItem == null)
+                {
+                    return NotFound();
+                }
+                existingItem.ProductId = item.ProductId;
+                existingItem.Name = item.Name;
+                existingItem.Stock = item.Stock;
+                existingItem.Price = item.Price;
+                await _context.SaveChangesAsync();
+                return NoContent();
             }
-            var existingItem = await _context.Inventory.FindAsync(id);
-            if (existingItem == null)
+
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, $"Error Updating Inventory: {ex.Message}");
             }
-            existingItem.ProductId = item.ProductId;
-            existingItem.Name = item.Name;
-            existingItem.Stock = item.Stock;
-            existingItem.Price = item.Price;
-            await _context.SaveChangesAsync();
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInventoryItem(int id)
         {
-            var item = await _context.Inventory.FindAsync(id);
-            if (item == null)
+            try
             {
-                return NotFound();
+                var item = await _context.Inventory.FindAsync(id);
+                if (item == null)
+                {
+                    return NotFound();
+                }
+                _context.Inventory.Remove(item);
+                await _context.SaveChangesAsync();
+                return NoContent();
             }
-            _context.Inventory.Remove(item);
-            await _context.SaveChangesAsync();
-            return NoContent();
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error Deleting Inventory: {ex.Message}");
+            }
         }
     }
 

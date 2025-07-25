@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
+using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +12,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//Added for documentation
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "OrderService", Version = "v1" });
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
+// Add logging
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+});
+
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -20,6 +37,22 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+
+//Add authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "https://localhost:44361", // Match ApiGateway port
+            ValidAudience = "https://localhost:44361", // Match ApiGateway port
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CloudOMSSolutionkdksbdksvbsvsivsivbksvbkvb")) // Same key
+        };
+    });
 
 // add DB
 builder.Services.AddDbContext<OrderContext>(options =>
@@ -36,7 +69,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -46,6 +79,8 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<OrderContext>();
     context.Database.Migrate();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Migrations applied for OrderService.");
 }
 
 app.Run();
