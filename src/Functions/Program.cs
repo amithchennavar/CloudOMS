@@ -14,6 +14,7 @@ builder.ConfigureServices((hostContext, services) =>
     {
         logging.AddConsole();
     });
+    services.AddHttpClient();
 });
 // Add logging
 
