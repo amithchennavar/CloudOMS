@@ -1,0 +1,8 @@
+# Azure Setup
+- **Resource Group**: <sandbox-resource-group-name>
+- **Cosmos DB**: cloudoms-cosmosdb-<your-initials>
+  - **Database**: OrderManagementDB
+  - **Containers**: Orders (/orderId), Inventory (/productId), Users (/userId)
+- **Function App**: cloudoms-functions-<your-initials>
+- **API Management**: cloudoms-apim-<your-initials>
+- **Service Fabric**: Skipped in sandbox; using Docker locally for development
