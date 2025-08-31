@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
   build-and-test:
@@ -42,7 +43,7 @@ jobs:
           retention-days: 5
 
       - name: Create Pull Request
-        if: github.ref == 'refs/heads/dev' && success()
+        if: github.event_name == 'pull_request' && github.base_ref == 'dev' && success()
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
