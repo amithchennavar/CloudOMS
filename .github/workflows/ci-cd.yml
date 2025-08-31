@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ./src/CloudOMS.sln
+        working-directory: .
+
+      - name: Build
+        run: dotnet build ./src/CloudOMS.sln --configuration Release --no-restore
+        working-directory: .
+
+      - name: Run tests
+        run: dotnet test ./src/OrderService.Tests/OrderService.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        working-directory: .
+
+      - name: Upload test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/*test-results.trx'
+          retention-days: 5
+
+      - name: Create Pull Request
+        if: github.event_name == 'pull_request' && github.base_ref == 'dev' && success()
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Automated PR from dev to main - Build ${{ github.run_number }}"
+          body: "This PR was automatically created because all tests passed on the dev branch."
+          base: main
+          branch: automated-dev-to-main
+          commit-message: "Automated commit for PR from dev to main"

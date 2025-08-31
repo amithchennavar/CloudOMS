@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OrderService.Models;
-
+//Order Context 1
 namespace OrderService.Data
 {
     public class OrderContext :DbContext
     {
-        public DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
 
         public OrderContext(DbContextOptions<OrderContext> options) : base(options)
         {
